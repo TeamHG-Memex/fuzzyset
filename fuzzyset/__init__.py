@@ -12,13 +12,16 @@ __all__ = ('FuzzySet',)
 
 class FuzzySet(object):
     " Fuzzily match a string "
-    def __init__(self, iterable=(), gram_size_lower=2, gram_size_upper=3, use_levenshtein=True):
+    def __init__(
+            self, iterable=(), gram_size_lower=2, gram_size_upper=3,
+            use_levenshtein=True, best_only=True):
         self.exact_set = {}
         self.match_dict = collections.defaultdict(list)
         self.items = {}
         self.use_levenshtein = use_levenshtein
         self.gram_size_lower = gram_size_lower
         self.gram_size_upper = gram_size_upper
+        self.best_only = best_only
         for i in range(gram_size_lower, gram_size_upper + 1):
             self.items[i] = []
         for value in iterable:
@@ -45,9 +48,10 @@ class FuzzySet(object):
 
     def __getitem__(self, value):
         lvalue = value.lower()
-        result = self.exact_set.get(lvalue)
-        if result:
-            return [(1, result)]
+        if self.best_only:
+            result = self.exact_set.get(lvalue)
+            if result:
+                return [(1, result)]
         for i in range(self.gram_size_upper, self.gram_size_lower - 1, -1):
             results = self.__get(value, i)
             if results is not None:
@@ -78,8 +82,12 @@ class FuzzySet(object):
                        for _, matched in results[:50]]
             results.sort(reverse=True, key=operator.itemgetter(0))
 
-        return [(score, self.exact_set[lval]) for score, lval in results
-                if score == results[0][0]]
+        results = [(score, self.exact_set[lval]) for score, lval in results]
+        if self.best_only:
+            best_score = results[0][0]
+            results = [(score, match) for score, match in results
+                       if score == best_score]
+        return results
 
 
     def get(self, key, default=None):

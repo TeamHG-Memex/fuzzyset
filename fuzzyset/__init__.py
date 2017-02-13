@@ -1,16 +1,18 @@
 from __future__ import print_function
-
 import re
 import math
 import operator
 import collections
+
 import Levenshtein
+
 
 __version__ = (0, 0, 10)
 
 _non_word_re = re.compile(r'[^\w, ]+')
 
 __all__ = ('FuzzySet',)
+
 
 class FuzzySet(object):
     " Fuzzily match a string "
@@ -91,7 +93,6 @@ class FuzzySet(object):
                        if score == best_score]
         return results
 
-
     def get(self, key, default=None):
         try:
             return self[key]
@@ -106,18 +107,18 @@ class FuzzySet(object):
     def __len__(self):
         return len(self.exact_set)
 
+
 def _distance(str1, str2):
     distance = Levenshtein.distance(str1, str2)
-    if len(str1) > len(str2):
-        return 1 - float(distance) / len(str1)
-    else:
-        return 1 - float(distance) / len(str2)
+    return 1 - float(distance) / max(len(str1), len(str2))
+
 
 def _gram_counter(value, gram_size=2):
     result = collections.defaultdict(int)
     for value in _iterate_grams(value, gram_size):
         result[value] += 1
     return result
+
 
 def _iterate_grams(value, gram_size=2):
     simplified = '-' + _non_word_re.sub('', value.lower()) + '-'
@@ -127,6 +128,7 @@ def _iterate_grams(value, gram_size=2):
     for i in range(len(simplified) - gram_size + 1):
         yield simplified[i:i + gram_size]
 
+
 def _other_test():
     with open('./origin_cities') as cities:
         for line in cities:
@@ -135,6 +137,7 @@ def _other_test():
                 print("{}: Could not find".format(line.strip()))
             elif isinstance(result, list):
                 print("{}: {}".format(line.strip(), result))
+
 
 if __name__ == '__main__':
     pass

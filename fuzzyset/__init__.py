@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import re
 import math
 import operator
@@ -98,6 +100,8 @@ class FuzzySet(object):
 
     def __nonzero__(self):
         return bool(self.exact_set)
+
+    __bool__ = __nonzero__
 
     def __len__(self):
         return len(self.exact_set)

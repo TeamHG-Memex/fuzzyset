@@ -1,0 +1,5 @@
+./setup.py
+./fuzzyset/__init__.py
+./tests/interactive.py
+./tests/profile.py
+./tests/performance.py
